@@ -1,0 +1,17 @@
+{
+  "name": "templar",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@sapphire/framework": "^5.3.4",
+    "discord.js": "^14.19.2",
+    "dotenv": "^16.5.0"
+  }
+}
