@@ -7,7 +7,6 @@ export class SlashCommand extends Command {
     super(context, {
       ...options,
       description: 'Notfify the Protection Unit about a crime.',
-      cooldownDelay: 300000
     });
   }
 
@@ -37,6 +36,13 @@ export class SlashCommand extends Command {
       min_length: 3,
       style: TextInputStyle.Short
     })
+    const perpetratorsInput = new TextInputBuilder({
+      customId: 'whotfdidit',
+      label: 'Give the name of the perpetrator(s)',
+      min_length: 3,
+      style: TextInputStyle.Short,
+      required: false
+    })
     const describeWhatTfHappenedInput = new TextInputBuilder({
       customId: 'describewtfhappened',
       label: 'Describe what is currently going on',
@@ -45,9 +51,10 @@ export class SlashCommand extends Command {
     })
 
     const firstActionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(whereInput)
+    const secondActionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(perpetratorsInput)
     const thirdActionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(describeWhatTfHappenedInput)
 
-    modal.addComponents(firstActionRow, thirdActionRow)
+    modal.addComponents(firstActionRow, secondActionRow, thirdActionRow)
 
     await interaction.showModal(modal);
 
@@ -56,6 +63,7 @@ export class SlashCommand extends Command {
       time: 120000
     }).then(async (modalInteraction) => {
       const whereValue = modalInteraction.fields.getTextInputValue('where')
+      const whoValue = modalInteraction.fields.getTextInputValue('whotfdidit')
       const describeValue = modalInteraction.fields.getTextInputValue('describewtfhappened')
 
       const reportEmbed = new EmbedBuilder()
@@ -68,6 +76,7 @@ export class SlashCommand extends Command {
       .setColor("Green")
       .addFields(
         { name: 'Where the incident happened', value: whereValue },
+        { name: 'Possible Perpetrators', value: whoValue },
         { name: 'Description of crime', value: describeValue }
       )
       .setImage(img?.proxyURL || null)
@@ -109,7 +118,7 @@ export class SlashCommand extends Command {
           const alertsChannel = interaction.guild?.channels.cache.get('1366784346375323648');
           if (alertsChannel?.isTextBased()) {
             alertsChannel.send({
-              content: 'you have received a new report.',
+              content: '<@&1363225302033236211>, A new report has been recieved.',
               embeds: [reportEmbed]
             });
           }
