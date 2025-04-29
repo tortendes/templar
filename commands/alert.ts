@@ -28,7 +28,7 @@ export class SlashCommand extends Command {
   public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
     const img = interaction.options.getAttachment('proof', false);
     const modal = new ModalBuilder({
-      customId: `reportCrime-${interaction.user.id}-${interaction.createdTimestamp}`,
+      customId: `reportCrime-${interaction.user.id}-${interaction.createdAt}`,
       title: "New Incident Report"
     })
     const whereInput = new TextInputBuilder({
@@ -37,33 +37,25 @@ export class SlashCommand extends Command {
       min_length: 3,
       style: TextInputStyle.Short
     })
-    const perpetratorsInput = new TextInputBuilder({
-      customId: 'whotfdidit',
-      label: 'Give the name of the perpetrator(s)',
-      min_length: 3,
-      style: TextInputStyle.Short,
-      required: false
-    })
     const describeWhatTfHappenedInput = new TextInputBuilder({
       customId: 'describewtfhappened',
       label: 'Describe what is currently going on',
-      style: TextInputStyle.Paragraph
+      style: TextInputStyle.Paragraph,
+      placeholder: 'Provide essential information that can help the Protection Unit.'
     })
 
     const firstActionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(whereInput)
-    const secondActionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(perpetratorsInput)
     const thirdActionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(describeWhatTfHappenedInput)
 
-    modal.addComponents(firstActionRow, secondActionRow, thirdActionRow)
+    modal.addComponents(firstActionRow, thirdActionRow)
 
     await interaction.showModal(modal);
 
     interaction.awaitModalSubmit({
-      filter: (f) => f.customId === `reportCrime-${interaction.user.id}-${interaction.createdTimestamp}`,
+      filter: (f) => f.customId === `reportCrime-${interaction.user.id}-${interaction.createdAt}`,
       time: 120000
     }).then(async (modalInteraction) => {
       const whereValue = modalInteraction.fields.getTextInputValue('where')
-      const whoValue = modalInteraction.fields.getTextInputValue('whotfdidit')
       const describeValue = modalInteraction.fields.getTextInputValue('describewtfhappened')
 
       const reportEmbed = new EmbedBuilder()
@@ -76,7 +68,6 @@ export class SlashCommand extends Command {
       .setColor("Green")
       .addFields(
         { name: 'Where the incident happened', value: whereValue },
-        { name: 'Possible Perpetrators', value: whoValue },
         { name: 'Description of crime', value: describeValue }
       )
       .setImage(img?.proxyURL || null)
